@@ -108,13 +108,52 @@ router.post("/new_debitCredit", async (req, res) => {
     });
 });
 
-router.post("/getDC", async (req, res) => {
+// get Debit Credit Transaction
+router.get("/getDC", async (req, res) => {
   Transaction.find({ dcDate: { $exists: true } })
     .sort({ dcDate: 1 })
     .then((transactions) => {
       console.log("DC", transactions);
       res.status(200).json({
         title: "DC fetched successfully!",
+        message: transactions,
+      });
+    });
+});
+
+router.get("/get_RandI_Transaction", async (req, res) => {
+  Transaction.find({
+    $or: [{ issueDate: { $exists: true } }, { returnDate: { $exists: true } }],
+  }).then((transactions) => {
+    console.log("IR", transactions);
+    res.status(200).json({
+      title: "IR fetched successfully!",
+      message: transactions,
+    });
+  });
+});
+
+//GET RETURNED TRANSACTION
+router.get("/getRT", async (req, res) => {
+  Transaction.find({ returnDate: { $exists: true } })
+    .sort({ returnDate: -1 })
+    .then((transactions) => {
+      console.log("RETURNED", transactions);
+      res.status(200).json({
+        title: "RETURNED fetched successfully!",
+        message: transactions,
+      });
+    });
+});
+
+//GET ALL TRANSACTION
+router.get("/allT", async (req, res) => {
+  Transaction.find()
+    // .sort({ returnDate: -1 })
+    .then((transactions) => {
+      console.log("All Transactions", transactions);
+      res.status(200).json({
+        title: "All Transactions fetched successfully!",
         message: transactions,
       });
     });
