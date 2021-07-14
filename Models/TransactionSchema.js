@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
 const transactionsSchema = mongoose.Schema({
-  itemName: { type: String, required: true },
-  weight: { type: Number, required: true },
-  principle: { type: Number, required: true },
-  roi: { type: Number, required: true },
-  issueDate: { type: String, required: true },
+  itemName: { type: String },
+  weight: { type: Number },
+  principle: { type: Number },
+  roi: { type: Number },
+  issueDate: { type: String },
   cusId: "ObjectId",
   returnDate: { type: String },
   profit: { type: Number },
@@ -13,6 +13,7 @@ const transactionsSchema = mongoose.Schema({
   returned: { type: Boolean },
   amount: { type: Number, required: false },
   description: { type: String },
+  dcDate: { type: Date },
 });
 
 const Transaction = mongoose.model("Transactions", transactionsSchema);

@@ -196,19 +196,7 @@ app.post("/api/return", async (req, res) => {
 });
 // 13
 /** add a debit credit */
-app.post("/api/debitCredit", async (req, res) => {
-  const debitCredit = new DebitCredit({
-    amount: req.body.amount,
-    date: date,
-    description: req.body.description,
-  });
 
-  debitCredit.save();
-  res.status(201).json({
-    message: "Post added successfully",
-  });
-  postOrders("DC");
-});
 // 14
 /*** Updating todayProfit,thisMonth profit, main bal etc*/
 app.post("/api/mainBal", async (req, res) => {

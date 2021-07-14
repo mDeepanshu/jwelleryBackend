@@ -91,4 +91,33 @@ function cusTran(uid, idToUse) {
   });
 }
 
+router.post("/new_debitCredit", async (req, res) => {
+  console.log(req.body);
+  const dcTransaction = new Transaction(req.body);
+  dcTransaction
+    .save()
+    .then((dcTransaction) => {
+      console.log(dcTransaction);
+      res.status(200).json({
+        title: "Success!",
+        message: "Transaction Saved",
+      });
+    })
+    .catch((err) => {
+      console.log("error", err);
+    });
+});
+
+router.post("/getDC", async (req, res) => {
+  Transaction.find({ dcDate: { $exists: true } })
+    .sort({ dcDate: 1 })
+    .then((transactions) => {
+      console.log("DC", transactions);
+      res.status(200).json({
+        title: "DC fetched successfully!",
+        message: transactions,
+      });
+    });
+});
+
 module.exports = router;
