@@ -32,12 +32,6 @@ router.post("/new_issue", async (req, res) => {
     .catch((ERR) => {
       console.log(ERR);
     });
-
-  // res.status(201).json({
-  //   message: "Post added successfully",
-  // });
-  // postOrders("T");
-  // cusTran(req.body.cusId);
 });
 
 app.post("/getTransaction", (req, res) => {
@@ -80,8 +74,8 @@ app.post("/getTransaction", (req, res) => {
 });
 
 router.post("/indiTrans", (req, res) => {
-  const { id } = req.query;
-  console.log("indiTrans", req.body, id);
+  // const { id } = req.query;
+  console.log("indiTrans", req.body);
 
   Transaction.find({ _id: req.body }).then((transactions) => {
     console.log(transactions);
