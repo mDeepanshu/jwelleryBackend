@@ -5,6 +5,8 @@ const router = express.Router();
 
 const Transaction = require("../Models/TransactionSchema");
 const Customer = require("../Models/CustomerSchema");
+const CommonTransaction = require("../Models/CommonTransactionSchema");
+const ReportsValue = require("../Models/ReportsValue");
 
 router.post("/new_issue", async (req, res) => {
   console.log("transaction", req.body);
@@ -14,15 +16,21 @@ router.post("/new_issue", async (req, res) => {
   transaction
     .save()
     .then((transaction) => {
-      console.log(transaction);
+      let commonTr = {
+        refId: transaction._id,
+        amount: transaction.principle,
+        date: transaction.issueDate,
+        type: "ISSUE",
+      };
       cusTran(transaction.cusId, transaction._id);
+      addToCommonTransaction(commonTr);
       res.status(200).json({
         title: "Success!",
         message: "Transaction Saved",
       });
     })
-    .catch(() => {
-      console.log("error");
+    .catch((ERR) => {
+      console.log(ERR);
     });
 
   // res.status(201).json({
@@ -73,7 +81,7 @@ app.post("/getTransaction", (req, res) => {
 
 router.post("/indiTrans", (req, res) => {
   const { id } = req.query;
-  console.log(req.body);
+  console.log("indiTrans", req.body, id);
 
   Transaction.find({ _id: req.body }).then((transactions) => {
     console.log(transactions);
@@ -92,71 +100,147 @@ function cusTran(uid, idToUse) {
 }
 
 router.post("/new_debitCredit", async (req, res) => {
-  console.log(req.body);
-  const dcTransaction = new Transaction(req.body);
-  dcTransaction
-    .save()
-    .then((dcTransaction) => {
-      console.log(dcTransaction);
-      res.status(200).json({
-        title: "Success!",
-        message: "Transaction Saved",
-      });
-    })
-    .catch((err) => {
-      console.log("error", err);
+  addToCommonTransaction(req.body).then(() => {
+    res.status(200).json({
+      title: "Success!",
+      message: "Transaction Saved",
     });
+  });
 });
 
 // get Debit Credit Transaction
 router.get("/getDC", async (req, res) => {
-  Transaction.find({ dcDate: { $exists: true } })
-    .sort({ dcDate: 1 })
-    .then((transactions) => {
+  CommonTransaction.find({ description: { $exists: true } }).then(
+    (transactions) => {
       console.log("DC", transactions);
       res.status(200).json({
         title: "DC fetched successfully!",
         message: transactions,
       });
-    });
+    }
+  );
 });
 
 router.get("/get_RandI_Transaction", async (req, res) => {
+  const { from, till } = req.query;
+  console.log(from, Number(till) + 86400000);
   Transaction.find({
-    $or: [{ issueDate: { $exists: true } }, { returnDate: { $exists: true } }],
+    $or: [
+      {
+        $and: [
+          { returnDate: { $gte: new Date(Number(from)) } },
+          { returnDate: { $lte: new Date(Number(till)) } },
+        ],
+      },
+      {
+        $and: [
+          { issueDate: { $gte: new Date(Number(from)) } },
+          { issueDate: { $lte: new Date(Number(till)) } },
+        ],
+      },
+    ],
   }).then((transactions) => {
-    console.log("IR", transactions);
-    res.status(200).json({
-      title: "IR fetched successfully!",
-      message: transactions,
+    // console.log(transactions[0].issueDate.getTime());
+    let toGetCustomer = [];
+    transactions.forEach((element) => {
+      toGetCustomer.push(element.cusId);
+    });
+    Customer.find({ _id: toGetCustomer }).then((customers) => {
+      res.status(200).json({
+        title: "IR fetched successfully!",
+        message: [transactions, customers],
+      });
     });
   });
 });
 
 //GET RETURNED TRANSACTION
 router.get("/getRT", async (req, res) => {
-  Transaction.find({ returnDate: { $exists: true } })
+  const { from, till } = req.query;
+  Transaction.find({
+    $and: [
+      { returnDate: { $gte: new Date(Number(from)) } },
+      { returnDate: { $lte: new Date(Number(till)) } },
+    ],
+  })
     .sort({ returnDate: -1 })
     .then((transactions) => {
       console.log("RETURNED", transactions);
-      res.status(200).json({
-        title: "RETURNED fetched successfully!",
-        message: transactions,
+      let toGetCustomer = [];
+      transactions.forEach((element) => {
+        toGetCustomer.push(element.cusId);
+      });
+      Customer.find({ _id: toGetCustomer }).then((customers) => {
+        res.status(200).json({
+          title: "Return transaction fetched successfully!",
+          message: [transactions, customers],
+        });
       });
     });
 });
 
 //GET ALL TRANSACTION
 router.get("/allT", async (req, res) => {
-  Transaction.find()
-    // .sort({ returnDate: -1 })
-    .then((transactions) => {
-      console.log("All Transactions", transactions);
-      res.status(200).json({
-        title: "All Transactions fetched successfully!",
-        message: transactions,
+  const { from, till } = req.query;
+  console.log(new Date(Number(from)), new Date(Number(till)));
+  CommonTransaction.find({
+    $and: [
+      { date: { $gte: new Date(Number(from)) } },
+      { date: { $lte: new Date(Number(till)) } },
+    ],
+  }).then((transactions) => {
+    console.log("All Transactions", transactions);
+    res.status(200).json({
+      title: "All Transactions fetched successfully!",
+      message: transactions,
+    });
+  });
+});
+
+function addToCommonTransaction(transaction) {
+  let p = new Promise((res, rej) => {
+    const commontransaction = new CommonTransaction(transaction);
+    commontransaction
+      .save()
+      .then(() => {
+        res("success");
+      })
+      .catch((err) => {
+        rej(err);
+      });
+  });
+  return p;
+}
+
+function alterReports(amount, type) {
+  if (type == "RETURN") {
+    amount *= 1;
+  }
+  ReportsValue.find().then((array) => {
+    customer.transactions.push(idToUse);
+    customer.save();
+  });
+}
+
+router.post("/return", async (req, res) => {
+  Transaction.findOne({ _id: req.body.issueRef }).then((document) => {
+    (document.returnDate = req.body.returnDate),
+      (document.profit = req.body.profit);
+    document.save().then(() => {
+      let commonTr = {
+        refId: req.body.issueRef,
+        amount: req.body.profit,
+        date: req.body.returnDate,
+        type: "RETURN",
+      };
+      addToCommonTransaction(commonTr).then(() => {
+        res.status(200).json({
+          title: "Success!",
+          message: "Transaction Saved",
+        });
       });
     });
+  });
 });
 
 module.exports = router;

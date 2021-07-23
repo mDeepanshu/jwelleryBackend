@@ -119,27 +119,7 @@ router.get("/getCustomer", (req, res) => {
 
 // 8
 // todo add pagination
-app.post("/api/getdebitCredit", (req, res) => {
-  // console.log(req.body[0],req.body[1]);
-  if (req.body.length == 2) {
-    DebitCredit.find({
-      $and: [{ date: { $gte: req.body[0] } }, { date: { $lte: req.body[1] } }],
-    }).then((documents) => {
-      // console.log(documents);
-      res.status(200).json({
-        message: "Posts fetched successfully!",
-        debitCredit: documents,
-      });
-    });
-  } else {
-    DebitCredit.find().then((documents) => {
-      res.status(200).json({
-        message: "Posts fetched successfully!",
-        debitCredit: documents,
-      });
-    });
-  }
-});
+
 // 9
 // todo add pagination
 app.post("/api/rtd", (req, res) => {
@@ -177,23 +157,7 @@ app.post("/api/addToItemsName", (req, res) => {
 
 // 12
 // todo refactor
-app.post("/api/return", async (req, res) => {
-  Transactions.findOneAndUpdate(
-    { _id: req.body._id },
-    {
-      $set: {
-        profit: req.body.profit,
-        returnDate: date,
-        returned: true,
-      },
-    }
-  ).then((transactions) => {
-    console.log("line 297 Done return");
-  });
-  res.status(201).json({
-    message: "return updated successfully",
-  });
-});
+
 // 13
 /** add a debit credit */
 
@@ -221,19 +185,6 @@ app.post("/api/addToReports", async (req, res) => {
   });
 });
 //16
-app.post("/api/orders", (req, res) => {
-  // finds order
-  //     // console.log(req.body[0],req.body[1]);
-  //
-  //     Orders.find({$and: [{date: {$gte: req.body[0]}}, {date: {$lte: req.body[1]}}]}).sort({_id: 1}).then(documents => {
-  //         // console.log(documents);
-  //         res.status(200).json({
-  //             message: "Posts fetched successfully!",
-  //             orders: documents
-  //         });
-  //     });
-  //
-});
 
 //17
 function postOrders(T) {
@@ -289,12 +240,7 @@ function postOrders(T) {
 }
 
 //18
-app.get("/api/newTrId", (req, res) => {
-  // after adding new tr, to add tr-id into cus-Tr arr without reloading
-  res.status(200).json({
-    Id: this.idToUse,
-  });
-});
+
 //19
 app.get("/api/getItemsName", (req, res) => {
   ItemsName.find().then((document) => {

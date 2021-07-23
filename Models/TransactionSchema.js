@@ -5,15 +5,14 @@ const transactionsSchema = mongoose.Schema({
   weight: { type: Number },
   principle: { type: Number },
   roi: { type: Number },
-  issueDate: { type: String },
+  issueDate: { type: Date },
   cusId: "ObjectId",
-  returnDate: { type: String },
+  returnDate: { type: Date },
   profit: { type: Number },
-  rid: { type: Number },
+  // rid: { type: Number },
   returned: { type: Boolean },
-  amount: { type: Number, required: false },
+  // amount: { type: Number, required: false },
   description: { type: String },
-  dcDate: { type: Date },
 });
 
 const Transaction = mongoose.model("Transactions", transactionsSchema);

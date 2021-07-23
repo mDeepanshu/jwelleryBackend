@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 
 const customer = require("./routes/customer");
 const transaction = require("./routes/transactions");
+const other = require("./routes/other");
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 
 app.use("/customer", customer);
 app.use("/transaction", transaction);
+app.use("/other", other);
 
 DB_LINK = "mongodb://localhost:27017/adj";
 mongoose
