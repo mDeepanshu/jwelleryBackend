@@ -333,4 +333,7 @@ app.get("/api/getAccounts", (req, res) => {
 
 app.get("/api/approveIt", (req, res) => {});
 
+app.get("/api/searchCustomer", (req,res)=>{
+
+})
 module.exports = router;
