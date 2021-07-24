@@ -211,8 +211,16 @@ function alterReports(amount, type) {
     amount *= 1;
   }
   ReportsValue.find().then((array) => {
-    customer.transactions.push(idToUse);
-    customer.save();
+    array[0] += amount;
+    if (type == "RETURN") {
+      array[4] += amount;
+      array[5] += amount;
+      array[6] += amount;
+    } else {
+      array[1] += amount;
+      array[2] += amount;
+      array[3] += amount;
+    }
   });
 }
 
