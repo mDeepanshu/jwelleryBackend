@@ -29,9 +29,11 @@ app.use((req, res, next) => {
 app.use("/customer", customer);
 app.use("/transaction", transaction);
 app.use("/other", other);
+
 // mongodb+srv://damon:qwert123@cluster0.qyevd.mongodb.net/mandi
 // mongodb://localhost:27017/adj
 DB_LINK = " mongodb+srv://damon:qwert123@cluster0.qyevd.mongodb.net/adj";
+
 mongoose
   .connect(DB_LINK, {
     useNewUrlParser: true,

@@ -104,20 +104,25 @@ router.post("/new_debitCredit", async (req, res) => {
 
 // get Debit Credit Transaction
 router.get("/getDC", async (req, res) => {
-  CommonTransaction.find({ description: { $exists: true } }).then(
-    (transactions) => {
+  let { limit, page } = req.query;
+  limit = parseInt(limit);
+  page = parseInt(page);
+  CommonTransaction.find({ description: { $exists: true } })
+    .limit(limit)
+    .skip((page - 1) * limit)
+    .then((transactions) => {
       console.log("DC", transactions);
       res.status(200).json({
         title: "DC fetched successfully!",
         message: transactions,
       });
-    }
-  );
+    });
 });
-
 router.get("/get_RandI_Transaction", async (req, res) => {
   const { from, till } = req.query;
-  console.log(from, Number(till) + 86400000);
+  let { limit, page } = req.query;
+  limit = parseInt(limit);
+  page = parseInt(page);
   Transaction.find({
     $or: [
       {
@@ -133,30 +138,39 @@ router.get("/get_RandI_Transaction", async (req, res) => {
         ],
       },
     ],
-  }).then((transactions) => {
-    // console.log(transactions[0].issueDate.getTime());
-    let toGetCustomer = [];
-    transactions.forEach((element) => {
-      toGetCustomer.push(element.cusId);
-    });
-    Customer.find({ _id: toGetCustomer }).then((customers) => {
-      res.status(200).json({
-        title: "IR fetched successfully!",
-        message: [transactions, customers],
+  })
+    .limit(limit)
+    .skip((page - 1) * limit)
+    .then((transactions) => {
+      // console.log(transactions[0].issueDate.getTime());
+      let toGetCustomer = [];
+      transactions.forEach((element) => {
+        toGetCustomer.push(element.cusId);
+      });
+      Customer.find({ _id: toGetCustomer }).then((customers) => {
+        res.status(200).json({
+          title: "IR fetched successfully!",
+          message: [transactions, customers],
+        });
       });
     });
-  });
 });
 
 //GET RETURNED TRANSACTION
+// todo add
 router.get("/getRT", async (req, res) => {
   const { from, till } = req.query;
+  let { limit, page } = req.query;
+  limit = parseInt(limit);
+  page = parseInt(page);
   Transaction.find({
     $and: [
       { returnDate: { $gte: new Date(Number(from)) } },
       { returnDate: { $lte: new Date(Number(till)) } },
     ],
   })
+    .limit(limit)
+    .skip((page - 1) * limit)
     .sort({ returnDate: -1 })
     .then((transactions) => {
       console.log("RETURNED", transactions);
@@ -174,21 +188,28 @@ router.get("/getRT", async (req, res) => {
 });
 
 //GET ALL TRANSACTION
+// todo add
 router.get("/allT", async (req, res) => {
   const { from, till } = req.query;
+  let { limit, page } = req.query;
+  limit = parseInt(limit);
+  page = parseInt(page);
   console.log(new Date(Number(from)), new Date(Number(till)));
   CommonTransaction.find({
     $and: [
       { date: { $gte: new Date(Number(from)) } },
       { date: { $lte: new Date(Number(till)) } },
     ],
-  }).then((transactions) => {
-    console.log("All Transactions", transactions);
-    res.status(200).json({
-      title: "All Transactions fetched successfully!",
-      message: transactions,
+  })
+    .limit(limit)
+    .skip((page - 1) * limit)
+    .then((transactions) => {
+      console.log("All Transactions", transactions);
+      res.status(200).json({
+        title: "All Transactions fetched successfully!",
+        message: transactions,
+      });
     });
-  });
 });
 
 function addToCommonTransaction(transaction) {
