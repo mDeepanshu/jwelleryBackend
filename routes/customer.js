@@ -336,4 +336,15 @@ app.get("/api/approveIt", (req, res) => {});
 app.get("/api/searchCustomer", (req,res)=>{
 
 })
+/** Autocomplete */
+const autocomplete = "autocomplete";
+router.get(`/${autocomplete}`, async (req, res) => {
+  const {keyword, limit} = req.query;
+  let regEx = new RegExp(keyword, "g");
+  const queryResult = await Customer
+      .find({"name": regEx})
+      .limit(parseInt(limit))
+      .exec();
+  res.send(queryResult);
+})
 module.exports = router;
