@@ -12,6 +12,8 @@ router.post("/new_issue", async (req, res) => {
   console.log("transaction", req.body);
   //   const { id } = req.query;
   //   console.log(id);
+  console.log(req.body.principle);
+  alterReports(req.body.principle, "DC");
   const transaction = new Transaction(req.body);
   transaction
     .save()
@@ -94,6 +96,7 @@ function cusTran(uid, idToUse) {
 }
 
 router.post("/new_debitCredit", async (req, res) => {
+  alterReports(req.body.amount, "DC");
   addToCommonTransaction(req.body).then(() => {
     res.status(200).json({
       title: "Success!",
@@ -165,8 +168,8 @@ router.get("/getRT", async (req, res) => {
   page = parseInt(page);
   Transaction.find({
     $and: [
-      { returnDate: { $gte: new Date(Number(from)) } },
-      { returnDate: { $lte: new Date(Number(till)) } },
+      { returnDate: { $gte: Number(from) } },
+      { returnDate: { $lte: Number(till) + 86400000 } },
     ],
   })
     .limit(limit)
@@ -194,11 +197,11 @@ router.get("/allT", async (req, res) => {
   let { limit, page } = req.query;
   limit = parseInt(limit);
   page = parseInt(page);
-  console.log(new Date(Number(from)), new Date(Number(till)));
+  console.log(typeof from, till);
   CommonTransaction.find({
     $and: [
-      { date: { $gte: new Date(Number(from)) } },
-      { date: { $lte: new Date(Number(till)) } },
+      { date: { $gte: Number(from) } },
+      { date: { $lte: Number(till) + 86400000 } },
     ],
   })
     .limit(limit)
@@ -228,20 +231,28 @@ function addToCommonTransaction(transaction) {
 }
 
 function alterReports(amount, type) {
+  console.log(amount);
   if (type == "RETURN") {
     amount *= 1;
   }
-  ReportsValue.find().then((array) => {
-    array[0] += amount;
+  ReportsValue.findOne({ _id: 0 }).then((array) => {
     if (type == "RETURN") {
-      array[4] += amount;
-      array[5] += amount;
-      array[6] += amount;
+      array.values[0] += amount;
+      array.values[4] += amount;
+      array.values[5] += amount;
+      array.values[6] += amount;
     } else {
-      array[1] += amount;
-      array[2] += amount;
-      array[3] += amount;
+      array.values[0] -= amount;
+      array.values[1] += amount;
+      array.values[2] += amount;
+      array.values[3] += amount;
     }
+    console.log(array.values);
+    ReportsValue.findOneAndReplace({ _id: 0 }, { values: array.values }).then(
+      (data) => {
+        console.log(data);
+      }
+    );
   });
 }
 
@@ -256,6 +267,7 @@ router.post("/return", async (req, res) => {
         date: req.body.returnDate,
         type: "RETURN",
       };
+      alterReports(req.body.profit, "RETURN");
       addToCommonTransaction(commonTr).then(() => {
         res.status(200).json({
           title: "Success!",
@@ -265,5 +277,10 @@ router.post("/return", async (req, res) => {
     });
   });
 });
+
+(() => {
+  let d = new Date();
+  console.log(d.getTime());
+})();
 
 module.exports = router;

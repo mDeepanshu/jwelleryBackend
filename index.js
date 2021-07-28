@@ -32,7 +32,7 @@ app.use("/other", other);
 
 // mongodb+srv://damon:qwert123@cluster0.qyevd.mongodb.net/mandi
 // mongodb://localhost:27017/adj
-DB_LINK = " mongodb+srv://damon:qwert123@cluster0.qyevd.mongodb.net/adj";
+DB_LINK = "mongodb://localhost:27017/adj";
 
 mongoose
   .connect(DB_LINK, {
