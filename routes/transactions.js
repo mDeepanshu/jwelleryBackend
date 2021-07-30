@@ -96,7 +96,7 @@ function cusTran(uid, idToUse) {
 }
 
 router.post("/new_debitCredit", async (req, res) => {
-  alterReports(req.body.amount, "DC");
+  alterReports(req.body.amount, req.body.type);
   addToCommonTransaction(req.body).then(() => {
     res.status(200).json({
       title: "Success!",
@@ -236,7 +236,11 @@ function alterReports(amount, type) {
     amount *= 1;
   }
   ReportsValue.findOne({ _id: 0 }).then((array) => {
-    if (type == "RETURN") {
+    if (type == "CREDIT") {
+      array.values[0] -= amount;
+    } else if (type == "DEBIT") {
+      array.values[0] += amount;
+    } else if (type == "RETURN") {
       array.values[0] += amount;
       array.values[4] += amount;
       array.values[5] += amount;
