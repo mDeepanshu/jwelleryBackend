@@ -26,7 +26,6 @@ router.get("/checkCredential", async (req, res) => {
 
 router.get("/getReportsValue", async (req, res) => {
   ReportsValue.find().then((reportsValue) => {
-    console.log("DC", reportsValue);
     res.status(200).json({
       title: "Reports Value fetched successfully!",
       message: reportsValue[0],

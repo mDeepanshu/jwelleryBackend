@@ -9,10 +9,7 @@ const CommonTransaction = require("../Models/CommonTransactionSchema");
 const ReportsValue = require("../Models/ReportsValue");
 
 router.post("/new_issue", async (req, res) => {
-  console.log("transaction", req.body);
   //   const { id } = req.query;
-  //   console.log(id);
-  console.log(req.body.principle);
   alterReports(req.body.principle, "DC");
   const transaction = new Transaction(req.body);
   transaction
@@ -37,7 +34,6 @@ router.post("/new_issue", async (req, res) => {
 });
 
 app.post("/getTransaction", (req, res) => {
-  console.log(req.body);
   Arr = req.body;
   if (Arr[0] == "rep") {
     Transactions.find(
@@ -63,11 +59,9 @@ app.post("/getTransaction", (req, res) => {
   else {
     let lesser = Arr[0];
     let greater = Arr[1];
-    console.log(Arr[0], Arr[1]);
     Transactions.find({
       $and: [{ issueDate: { $gte: Arr[0] } }, { issueDate: { $lte: Arr[1] } }],
     }).then((documents) => {
-      console.log(documents);
       res.status(200).json({
         transactions: documents,
       });
@@ -77,10 +71,7 @@ app.post("/getTransaction", (req, res) => {
 
 router.post("/indiTrans", (req, res) => {
   // const { id } = req.query;
-  console.log("indiTrans", req.body);
-
   Transaction.find({ _id: req.body }).then((transactions) => {
-    console.log(transactions);
     res.status(200).json({
       title: "Posts fetched successfully!",
       message: transactions,
@@ -107,14 +98,19 @@ router.post("/new_debitCredit", async (req, res) => {
 
 // get Debit Credit Transaction
 router.get("/getDC", async (req, res) => {
-  let { limit, page } = req.query;
+  let { limit, page, from, till } = req.query;
   limit = parseInt(limit);
   page = parseInt(page);
-  CommonTransaction.find({ description: { $exists: true } })
+  CommonTransaction.find({
+    $and: [
+      { date: { $gte: Number(from) } },
+      { date: { $lte: Number(till) + 86400000 } },
+      { description: { $exists: true } },
+    ],
+  })
     .limit(limit)
     .skip((page - 1) * limit)
     .then((transactions) => {
-      console.log("DC", transactions);
       res.status(200).json({
         title: "DC fetched successfully!",
         message: transactions,
@@ -123,6 +119,7 @@ router.get("/getDC", async (req, res) => {
 });
 router.get("/get_RandI_Transaction", async (req, res) => {
   const { from, till } = req.query;
+  console.log("from, till", from, till);
   let { limit, page } = req.query;
   limit = parseInt(limit);
   page = parseInt(page);
@@ -131,13 +128,13 @@ router.get("/get_RandI_Transaction", async (req, res) => {
       {
         $and: [
           { returnDate: { $gte: new Date(Number(from)) } },
-          { returnDate: { $lte: new Date(Number(till)) } },
+          { returnDate: { $lte: new Date(Number(till) + 86400000) } },
         ],
       },
       {
         $and: [
           { issueDate: { $gte: new Date(Number(from)) } },
-          { issueDate: { $lte: new Date(Number(till)) } },
+          { issueDate: { $lte: new Date(Number(till) + 86400000) } },
         ],
       },
     ],
@@ -145,7 +142,6 @@ router.get("/get_RandI_Transaction", async (req, res) => {
     .limit(limit)
     .skip((page - 1) * limit)
     .then((transactions) => {
-      // console.log(transactions[0].issueDate.getTime());
       let toGetCustomer = [];
       transactions.forEach((element) => {
         toGetCustomer.push(element.cusId);
@@ -176,7 +172,6 @@ router.get("/getRT", async (req, res) => {
     .skip((page - 1) * limit)
     .sort({ returnDate: -1 })
     .then((transactions) => {
-      console.log("RETURNED", transactions);
       let toGetCustomer = [];
       transactions.forEach((element) => {
         toGetCustomer.push(element.cusId);
@@ -197,7 +192,6 @@ router.get("/allT", async (req, res) => {
   let { limit, page } = req.query;
   limit = parseInt(limit);
   page = parseInt(page);
-  console.log(typeof from, till);
   CommonTransaction.find({
     $and: [
       { date: { $gte: Number(from) } },
@@ -207,7 +201,6 @@ router.get("/allT", async (req, res) => {
     .limit(limit)
     .skip((page - 1) * limit)
     .then((transactions) => {
-      console.log("All Transactions", transactions);
       res.status(200).json({
         title: "All Transactions fetched successfully!",
         message: transactions,
@@ -231,7 +224,6 @@ function addToCommonTransaction(transaction) {
 }
 
 function alterReports(amount, type) {
-  console.log(amount);
   if (type == "RETURN") {
     amount *= 1;
   }
@@ -251,11 +243,8 @@ function alterReports(amount, type) {
       array.values[2] += amount;
       array.values[3] += amount;
     }
-    console.log(array.values);
     ReportsValue.findOneAndReplace({ _id: 0 }, { values: array.values }).then(
-      (data) => {
-        console.log(data);
-      }
+      (data) => {}
     );
   });
 }
@@ -282,9 +271,26 @@ router.post("/return", async (req, res) => {
   });
 });
 
-(() => {
+(async () => {
   let d = new Date();
-  console.log(d.getTime());
+  let mainBal;
+  await ReportsValue.find().then((reportsValue) => {
+    mainBal = reportsValue[0].values[0];
+  });
+  CommonTransaction.find()
+    .sort({ date: -1 })
+    .limit(1)
+    .then((transactions) => {
+      let s = new Date(transactions[0].date);
+      if (d.getDate() != s.getDate()) {
+        let transaction = {
+          date: d.getTime(),
+          mainBal: mainBal,
+        };
+        const commontransaction = new CommonTransaction(transaction);
+        commontransaction.save().then((result) => {});
+      }
+    });
 })();
 
 module.exports = router;

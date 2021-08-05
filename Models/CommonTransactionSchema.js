@@ -5,7 +5,8 @@ const commonTransactionsSchema = mongoose.Schema({
   date: { type: Number },
   amount: { type: Number, required: false },
   description: { type: String },
-  type: { type: String, required: true },
+  type: { type: String },
+  mainBal: { type: Number },
 });
 
 const commonTransaction = mongoose.model(
