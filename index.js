@@ -41,7 +41,7 @@ mongoose
   })
   .then(() => {
     console.log("Connected to database!");
-    const server = app.listen(3000);
+    const server = app.listen(process.env.PORT || 3000);
     const io = require("socket.io")(server, {
       cors: {
         origin: "*",
