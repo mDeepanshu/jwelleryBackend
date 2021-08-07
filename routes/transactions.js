@@ -99,7 +99,7 @@ router.post("/new_debitCredit", async (req, res) => {
 // get Debit Credit Transaction
 router.get("/getDC", async (req, res) => {
   let { limit, page, from, till } = req.query;
-  limit = parseInt(limit);
+  limit = 1;
   page = parseInt(page);
   CommonTransaction.find({
     $and: [
@@ -119,9 +119,8 @@ router.get("/getDC", async (req, res) => {
 });
 router.get("/get_RandI_Transaction", async (req, res) => {
   const { from, till } = req.query;
-  console.log("from, till", from, till);
   let { limit, page } = req.query;
-  limit = parseInt(limit);
+  limit = 1;
   page = parseInt(page);
   Transaction.find({
     $or: [
@@ -160,7 +159,7 @@ router.get("/get_RandI_Transaction", async (req, res) => {
 router.get("/getRT", async (req, res) => {
   const { from, till } = req.query;
   let { limit, page } = req.query;
-  limit = parseInt(limit);
+  limit = 100;
   page = parseInt(page);
   Transaction.find({
     $and: [
@@ -190,7 +189,7 @@ router.get("/getRT", async (req, res) => {
 router.get("/allT", async (req, res) => {
   const { from, till } = req.query;
   let { limit, page } = req.query;
-  limit = parseInt(limit);
+  limit = 1;
   page = parseInt(page);
   CommonTransaction.find({
     $and: [
