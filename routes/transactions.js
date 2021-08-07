@@ -71,7 +71,7 @@ app.post("/getTransaction", (req, res) => {
 
 router.post("/indiTrans", (req, res) => {
   // const { id } = req.query;
-  Transaction.find({ _id: req.body }).then((transactions) => {
+  Transaction.find({ cusId: req.query.cusId }).then((transactions) => {
     res.status(200).json({
       title: "Posts fetched successfully!",
       message: transactions,
